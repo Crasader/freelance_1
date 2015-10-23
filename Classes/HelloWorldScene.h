@@ -9,6 +9,10 @@
 
 USING_NS_CC;
 
+typedef enum{
+	NORMALTOOLS = 588,
+} TOOLSTATE;
+
 class HelloWorld : public cocos2d::Layer
 {
 public:
@@ -23,6 +27,7 @@ public:
 
 	void pauseCallback(cocos2d::Ref* pSender);
 	void playCallback(cocos2d::Ref* pSender);
+	void leaderBoardCallback(cocos2d::Ref* pSender);
 	void menuCallback(cocos2d::Ref* pSender);
 	void replayCallback(cocos2d::Ref* pSender);
     
@@ -58,6 +63,7 @@ private:
 
 	MenuItemImage* pauseItem;
 	MenuItemImage* playItem;
+	MenuItemImage* leaderboardItem;
 	MenuItemImage* menuItem;
 	MenuItemImage* replayItem;
 

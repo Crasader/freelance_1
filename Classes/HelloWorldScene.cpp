@@ -3,6 +3,7 @@
 #include "ScoreBoard.h"
 #include "base\CCUserDefault.h"
 #include "SimpleAudioEngine.h"
+#include "SonarFrameworks.h"
 
 USING_NS_CC;
 
@@ -114,14 +115,24 @@ bool HelloWorld::init()
 		"playPress.png",
 		CC_CALLBACK_1(HelloWorld::playCallback, this));
 
-	playItem->setPosition(Vec2(winSize.x / 2,
+	playItem->setPosition(Vec2(winSize.x / 2 - 150,
 		winSize.y / 2));
 
 	playItem->runAction(RepeatForever::create(Sequence::createWithTwoActions(ScaleTo::create(0.5f, 0.98f), ScaleTo::create(0.5f, 1))));
+
+	leaderboardItem = MenuItemImage::create(
+		"leaderboard.png",
+		"leaderboardPress.png",
+		CC_CALLBACK_1(HelloWorld::leaderBoardCallback, this));
+
+	leaderboardItem->setPosition(Vec2(winSize.x / 2 + 150,
+		winSize.y / 2));
+
+	leaderboardItem->runAction(RepeatForever::create(Sequence::createWithTwoActions(ScaleTo::create(0.5f, 0.98f), ScaleTo::create(0.5f, 1))));
 	
 
     // create menu, it's an autorelease object
-	auto menu = Menu::create(pauseItem, playItem, replayItem, menuItem, NULL);
+	auto menu = Menu::create(pauseItem, playItem, replayItem, menuItem, leaderboardItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
@@ -132,6 +143,9 @@ bool HelloWorld::init()
 	pauseItem->setOpacity(0);
 	scoreLabel->setOpacity(0);
 	pausingSprite->setOpacity(50);
+
+	if (!SonarCocosHelper::GooglePlayServices::isSignedIn())
+		SonarCocosHelper::GooglePlayServices::signIn();
     
     return true;
 }
@@ -351,10 +365,21 @@ void HelloWorld::lose()
 	board->setPosition(winSize.x / 2, winSize.y /2 + 100);
  	thingToDelete.push_back(board);
 
+
 	replayItem->setEnabled(true);
 	replayItem->setOpacity(255);
 	menuItem->setEnabled(true);
 	menuItem->setOpacity(255);
+
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	if (!SonarCocosHelper::GooglePlayServices::isSignedIn()){
+			SonarCocosHelper::GooglePlayServices::signIn();
+			//SonarCocosHelper::GooglePlayServices::showLeaderboard("CgkI2dnm3N0XEAIQAA");
+
+	}
+	SonarCocosHelper::GooglePlayServices::submitScore("CgkI2dnm3N0XEAIQAA", score);
+#endif
+
 }
 
 void HelloWorld::pauseCallback(cocos2d::Ref* pSender)
@@ -390,6 +415,14 @@ void HelloWorld::playCallback(cocos2d::Ref* pSender)
 		playItem->setEnabled(false);
 		playItem->setOpacity(0);
 		playItem->stopAllActions();
+
+		Vec2 winSize = Director::getInstance()->getWinSize();
+		playItem->setPosition(Vec2(winSize.x / 2,
+			winSize.y / 2));
+
+		leaderboardItem->setEnabled(false);
+		leaderboardItem->setOpacity(0);
+		leaderboardItem->stopAllActions();
 	}
 }
 
@@ -402,6 +435,18 @@ void HelloWorld::menuCallback(cocos2d::Ref* pSender)
 void HelloWorld::replayCallback(cocos2d::Ref* pSender)
 {
 	reset();
+}
+
+void HelloWorld::leaderBoardCallback(cocos2d::Ref* pSender)
+{
+
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	if (!SonarCocosHelper::GooglePlayServices::isSignedIn()){
+			SonarCocosHelper::GooglePlayServices::signIn();
+
+	}
+	SonarCocosHelper::GooglePlayServices::showLeaderboard("CgkI2dnm3N0XEAIQAA");
+#endif
 }
 
 
