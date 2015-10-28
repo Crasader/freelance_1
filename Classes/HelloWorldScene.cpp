@@ -3,7 +3,7 @@
 #include "ScoreBoard.h"
 #include "base\CCUserDefault.h"
 #include "SimpleAudioEngine.h"
-#include "SonarFrameworks.h"
+//#include "SonarFrameworks.h"
 
 USING_NS_CC;
 
