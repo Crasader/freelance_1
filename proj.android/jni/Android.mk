@@ -19,6 +19,9 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 				   ../../Classes/spaceship.cpp \
 				   ../../Classes/wall.cpp \
 				   ../../Classes/wallset.cpp \
+				   ../../Classes/SonarFrameworks.cpp \
+				   ../../Classes/JNIHelpers.cpp \
+				   ../../Classes/JNIResults.cpp \
                    ../../Classes/HelloWorldScene.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes

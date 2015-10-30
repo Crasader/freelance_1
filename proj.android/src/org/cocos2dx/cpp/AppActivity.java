@@ -26,7 +26,90 @@ THE SOFTWARE.
 ****************************************************************************/
 package org.cocos2dx.cpp;
 
-import org.cocos2dx.lib.Cocos2dxActivity;
+import java.util.Arrays;
 
-public class AppActivity extends Cocos2dxActivity {
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareDialog;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import sonar.systems.framework.SonarFrameworkActivity;
+
+public class AppActivity extends SonarFrameworkActivity {
+	CallbackManager callbackManager;
+	static ShareDialog shareDialog;
+	
+	@Override
+	protected void onCreate(Bundle b) {
+		// TODO Auto-generated method stub
+		super.onCreate(b);
+		FacebookSdk.sdkInitialize(getApplicationContext());
+        callbackManager = CallbackManager.Factory.create();
+        shareDialog = new ShareDialog(this);
+        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+            	
+               
+                
+                //if (ShareDialog.canShow(ShareLinkContent.class)) {
+                    
+               // }
+            }
+
+            @Override
+            public void onCancel() {
+                 // App code
+            }
+
+            @Override
+            public void onError(FacebookException exception) {
+                 // App code   
+            }});
+       // LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("publish_actions"));
+        // this part is optional
+        shareDialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+        	 @Override
+             public void onCancel() {
+
+             }
+
+             @Override
+             public void onError(FacebookException error) {
+
+             }
+
+             @Override
+             public void onSuccess(Sharer.Result result) {
+
+             }
+
+        });
+	}
+	
+	@Override
+	protected void onActivityResult(int request, int response, Intent data) {
+		// TODO Auto-generated method stub
+		super.onActivityResult(request, response, data);
+		callbackManager.onActivityResult(request, response, data);
+	}
+	
+	public static void shareScore(int score){
+		ShareLinkContent linkContent = new ShareLinkContent.Builder()
+                .setContentTitle("Zippyroid")
+                .setContentDescription(
+                       "I scored " + Integer.toString(score) + "!!!")
+                .setContentUrl(Uri.parse("https://www.facebook.com/zippyroid"))
+                .build();
+
+        shareDialog.show(linkContent);
+	}
 }
