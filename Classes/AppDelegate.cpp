@@ -1,6 +1,7 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
 
+
 USING_NS_CC;
 
 AppDelegate::AppDelegate() {
@@ -32,6 +33,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
         director->setOpenGLView(glview);
     }
 
+
     // turn on display FPS
     director->setDisplayStats(false);
 
@@ -45,6 +47,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // run
     director->runWithScene(scene);
+
+
 
     return true;
 }

@@ -3,7 +3,12 @@
 #include "ScoreBoard.h"
 #include "base\CCUserDefault.h"
 #include "SimpleAudioEngine.h"
-//#include "SonarFrameworks.h"
+#include "platform/android/jni/JniHelper.h"
+#include <jni.h>
+
+#if (CC_TARGET_PLATFORM != CC_PLATFORM_WIN32)
+#include "SonarFrameworks.h"
+#endif
 
 USING_NS_CC;
 
@@ -31,7 +36,13 @@ bool HelloWorld::init()
     {
         return false;
     }
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("win.mp3");
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("explosion.mp3");
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("poc.mp3");
     
+
+
+
 	isPausing = false;
 
     Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -95,7 +106,7 @@ bool HelloWorld::init()
 		"menuPress.png",
 		CC_CALLBACK_1(HelloWorld::menuCallback, this));
 
-	menuItem->setPosition(Vec2(winSize.x/2 + 95,
+	menuItem->setPosition(Vec2(winSize.x/2 + 130,
 		winSize.y/2 - 100));
 	menuItem->setEnabled(false);
 	menuItem->setOpacity(0);
@@ -104,10 +115,19 @@ bool HelloWorld::init()
 		"replayPress.png",
 		CC_CALLBACK_1(HelloWorld::replayCallback, this));
 
-	replayItem->setPosition(Vec2(winSize.x / 2 - 105,
+	replayItem->setPosition(Vec2(winSize.x / 2 - 135,
 		winSize.y/2 - 100));
 	replayItem->setEnabled(false);
 	replayItem->setOpacity(0);
+
+	fbItem = MenuItemImage::create("facebook.png",
+		"facebookPress.png",
+		CC_CALLBACK_1(HelloWorld::fbCallback, this));
+
+	fbItem->setPosition(Vec2(winSize.x / 2 ,
+		winSize.y / 2 - 100));
+	fbItem->setEnabled(false);
+	fbItem->setOpacity(0);
 
 
 	playItem = MenuItemImage::create(
@@ -132,7 +152,7 @@ bool HelloWorld::init()
 	
 
     // create menu, it's an autorelease object
-	auto menu = Menu::create(pauseItem, playItem, replayItem, menuItem, leaderboardItem, NULL);
+	auto menu = Menu::create(pauseItem, playItem, replayItem, menuItem, leaderboardItem, fbItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
@@ -144,8 +164,15 @@ bool HelloWorld::init()
 	scoreLabel->setOpacity(0);
 	pausingSprite->setOpacity(50);
 
+	//sdkbox::PluginFacebook::login();
+	//SonarCocosHelper::Facebook::Share("Zippyroid","https://www.facebook.com/zippyroid", "I scored 33!!!", "","");
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+
 	if (!SonarCocosHelper::GooglePlayServices::isSignedIn())
 		SonarCocosHelper::GooglePlayServices::signIn();
+	SonarCocosHelper::AdMob::showBannerAd();
+	SonarCocosHelper::GoogleAnalytics::setScreenName("Gameplay");
+#endif
     
     return true;
 }
@@ -175,8 +202,8 @@ void HelloWorld::reset()
 	smoke = ParticleSmoke::create();
 	smoke->setPositionType(ParticleSmoke::PositionType::FREE);
 	smoke->setSpeed(200);
-	smoke->setEmissionRate(100);
-	smoke->setTotalParticles(500);
+	smoke->setEmissionRate(25);
+	smoke->setTotalParticles(125);
 	smoke->setLife(1);
 
 	mainSprite->addChild(smoke);
@@ -189,8 +216,8 @@ void HelloWorld::reset()
 	fire = ParticleFire::create();
 	fire->setPositionType(ParticleSystem::PositionType::FREE);
 	fire->setSpeed(200);
-	fire->setEmissionRate(200);
-	fire->setTotalParticles(500);
+	fire->setEmissionRate(25);
+	fire->setTotalParticles(125);
 	fire->setLife(2);
 	fire->setPosition(spaceShip->getPosition());
 	mainSprite->addChild(fire);
@@ -207,6 +234,8 @@ void HelloWorld::reset()
 	menuItem->setOpacity(0);
 	replayItem->setEnabled(false);
 	replayItem->setOpacity(0);
+	fbItem->setEnabled(false);
+	fbItem->setOpacity(0);
 	score = 0;
 	scoreLabel->setString(CCString::createWithFormat("%d", score)->getCString());
 	scoreLabel->setOpacity(255);
@@ -240,7 +269,7 @@ void HelloWorld::update(float delta)
 					if (wallSet->checkScore(spaceShip)){
 						score++;
 						scoreLabel->setString(CCString::createWithFormat("%d", score)->getCString());
-						CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sfx/win.mp3", false, 1.0f);
+						CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("win.mp3", false, 1.0f);
 					}
 
 					vector<SmallAsteroid*> notDeleteList;
@@ -296,7 +325,7 @@ bool HelloWorld::onTouchBegan(Touch *touch, Event *unused_event)
 	if (isPlaying){
 		if (!isPausing){
 			auto ast = spaceShip->push();
-			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sfx/poc.mp3", false, 1.0f);
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("poc.mp3", false, 1.0f);
 			mainSprite->addChild(ast);
 			sAst.push_back(ast);
 			ast->setPosition(spaceShip->getPosition());
@@ -329,7 +358,7 @@ void HelloWorld::onTouchCancelled(Touch *touch, Event *unused_event)
 
 void HelloWorld::lose()
 {
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sfx/explosion.mp3", false, 1.0f);
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("explosion.mp3", false, 1.0f);
 	endGame = true;
 	spaceShip->stopAllActions();
 	spaceShip->setOpacity(0);
@@ -370,14 +399,14 @@ void HelloWorld::lose()
 	replayItem->setOpacity(255);
 	menuItem->setEnabled(true);
 	menuItem->setOpacity(255);
+	fbItem->setEnabled(true);
+	fbItem->setOpacity(255);
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-	if (!SonarCocosHelper::GooglePlayServices::isSignedIn()){
-			SonarCocosHelper::GooglePlayServices::signIn();
-			//SonarCocosHelper::GooglePlayServices::showLeaderboard("CgkI2dnm3N0XEAIQAA");
-
+	if (SonarCocosHelper::GooglePlayServices::isSignedIn()){
+		SonarCocosHelper::GooglePlayServices::submitScore("CgkI2dnm3N0XEAIQAA", score);
 	}
-	SonarCocosHelper::GooglePlayServices::submitScore("CgkI2dnm3N0XEAIQAA", score);
+
 #endif
 
 }
@@ -448,5 +477,24 @@ void HelloWorld::leaderBoardCallback(cocos2d::Ref* pSender)
 	SonarCocosHelper::GooglePlayServices::showLeaderboard("CgkI2dnm3N0XEAIQAA");
 #endif
 }
+
+
+void HelloWorld::fbCallback(cocos2d::Ref* pSender)
+{
+//	std::vector<std::string> permis;
+//	permis.push_back(std::string("publish_actions"));
+//	CCLOG("login click");
+//	log("login click");
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	JniMethodInfo methodInfo;
+			if (!JniHelper::getStaticMethodInfo(methodInfo, "org/cocos2dx/cpp/AppActivity", "shareScore", "(I)V")) {
+				return;
+			}
+
+			methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, score);
+			methodInfo.env->DeleteLocalRef(methodInfo.classID);
+#endif
+}
+
 
 

@@ -7,13 +7,10 @@
 #include "SmallAsteroid.h"
 #include "MyParalax.h"
 
+
 USING_NS_CC;
 
-typedef enum{
-	NORMALTOOLS = 588,
-} TOOLSTATE;
-
-class HelloWorld : public cocos2d::Layer
+class HelloWorld : public Layer
 {
 public:
     // there's no 'id' in cpp, so we recommend returning the class instance pointer
@@ -30,9 +27,11 @@ public:
 	void leaderBoardCallback(cocos2d::Ref* pSender);
 	void menuCallback(cocos2d::Ref* pSender);
 	void replayCallback(cocos2d::Ref* pSender);
+	void fbCallback(cocos2d::Ref* pSender);
     
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
+
 
 	void update(float delta) override;
 
@@ -45,6 +44,7 @@ public:
 	virtual void onTouchCancelled(Touch *touch, Event *unused_event);
 
 private:
+
 	void lose();
 	void reset();
 	int viewPoint;
@@ -62,6 +62,7 @@ private:
 	Label* scoreLabel;
 
 	MenuItemImage* pauseItem;
+	MenuItemImage* fbItem;
 	MenuItemImage* playItem;
 	MenuItemImage* leaderboardItem;
 	MenuItemImage* menuItem;
